@@ -1,0 +1,1184 @@
+// paste ts into violentmoneky or tamper idk
+// This software and its original feature set, including the UI layout, integrated asset tools, and the Ultrablox branding, are the intellectual property of rpgfloss man. Unauthorized redistribution, modification for commercial use, or claiming credit for the source code is strictly prohibited under the specified ownership. 
+// ==UserScript==
+// @name         Ultrablox
+// @namespace    https://ultrablox.custom
+// @version      5.0
+// @description  Ultrablox — the ultimate Roblox enhancement suite. Limited charts, asset tools, premium UI.
+// @author       Ultrablox Team
+// @match        https://www.roblox.com/*
+// @match        https://web.roblox.com/*
+// @grant        GM_addStyle
+// @grant        GM_setValue
+// @grant        GM_getValue
+// @grant        GM_xmlhttpRequest
+// @connect      thumbnails.roblox.com
+// @connect      assetdelivery.roblox.com
+// @connect      economy.roblox.com
+// @run-at       document-idle
+// ==/UserScript==
+
+(function () {
+    'use strict';
+
+    // ========================================================================
+    //  SVG ICONS
+    // ========================================================================
+    const IC = {
+        rocket: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>',
+        pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16h14v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6l1.67-2.58A1 1 0 0 0 15.83 2H8.17a1 1 0 0 0-.84 1.42L9 6v4.76z"/></svg>',
+        pinFill: '<svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 17v5M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16h14v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6l1.67-2.58A1 1 0 0 0 15.83 2H8.17a1 1 0 0 0-.84 1.42L9 6v4.76z"/></svg>',
+        x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="12" height="12"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+        gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+        search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+        clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="13" height="13"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+        star: '<svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>',
+        download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+        copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+        dollar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+        palette: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.93 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.04-.23-.29-.38-.63-.38-1.02 0-.83.67-1.5 1.5-1.5H16c3.31 0 6-2.69 6-6 0-5.17-4.49-9-10-9z"/></svg>',
+        chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+        trending: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>',
+        history: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="14" height="14"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>',
+        play: '<svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><polygon points="5 3 19 12 5 21 5 3"/></svg>',
+        user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="13" height="13"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+        calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="13" height="13"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+    };
+
+    // ========================================================================
+    //  SETTINGS
+    // ========================================================================
+    const DEFAULTS = {
+        darkMode: true, welcomeBanner: true, pinnedGames: true, branding: true,
+        watermark: true, hoverFx: true, sessionTimer: true, spotlightSearch: true,
+        cursorGlow: false, assetDownload: true, copyId: true, robuxConvert: true,
+        limitedChart: true, recentGames: true, quickRejoin: true, profileAge: true,
+        accentColor: '#7c6ef6', animSpeed: 'normal', cardStyle: 'elevated', fontSize: 'default',
+        themePreset: 'custom',
+    };
+    function getS() { try { return { ...DEFAULTS, ...JSON.parse(GM_getValue('rp_settings', '{}')) }; } catch { return { ...DEFAULTS }; } }
+    function saveS(s) { GM_setValue('rp_settings', JSON.stringify(s)); }
+    let S = getS();
+
+    function hexRgb(h) { return `${parseInt(h.slice(1, 3), 16)},${parseInt(h.slice(3, 5), 16)},${parseInt(h.slice(5, 7), 16)}`; }
+
+    // ========================================================================
+    //  CSS — ULTRABLOX PREMIUM PALETTE
+    // ========================================================================
+    function buildCSS() {
+        const ac = S.accentColor, ar = hexRgb(ac);
+        const sp = S.animSpeed === 'none' ? '0s' : S.animSpeed === 'reduced' ? '0.12s' : '0.25s';
+        const hv = S.hoverFx ? 'translateY(-3px)' : 'none';
+        const fs = S.fontSize === 'small' ? '0.92' : S.fontSize === 'large' ? '1.08' : '1';
+        return `
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+:root{
+--rp1:#0e0e13;--rp2:#151519;--rp3:#1c1c24;--rpH:#25252f;
+--ac:${ac};--acR:${ar};--acG:color-mix(in srgb,${ac} 70%,white);
+--mn:#4ade80;--amb:#e2a336;--pk:#e8688a;
+--t1:#d8d8e2;--t2:#7e7e96;--t3:#505064;
+--bd:rgba(255,255,255,0.06);--bdH:rgba(255,255,255,0.12);
+--sp:${sp};--fs:${fs};
+}
+body,html{background:var(--rp1)!important;color:var(--t1)!important;
+font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;
+font-size:calc(14px*var(--fs))!important;scrollbar-width:thin;scrollbar-color:var(--rp3) var(--rp2);}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--rp2)}
+::-webkit-scrollbar-thumb{background:rgba(${ar},0.25);border-radius:3px}
+
+/* HEADER */
+#header,.rbx-header,header,.nav-container,.navbar,.rbx-navbar,[class*="navbar"]{
+background:var(--rp2)!important;
+border-bottom:1px solid rgba(${ar},0.15)!important;
+box-shadow:0 1px 0 rgba(${ar},0.06)!important;}
+#header *,.rbx-header *,header *{color:var(--t1)!important;}
+
+/* SIDEBAR — no border on items by default */
+#navigation,.rbx-left-col,.left-col-list,[class*="simplebar"],[class*="left-col"]{
+background:var(--rp2)!important;border-right:1px solid var(--bd)!important;}
+#navigation li,.left-col-list li,.rbx-left-col li{
+margin:1px 6px!important;border-radius:8px!important;border:none!important;
+transition:background var(--sp) ease!important;}
+#navigation li:hover,.left-col-list li:hover{background:var(--rpH)!important;}
+#navigation li a,.left-col-list li a,.rbx-left-col li a{
+color:var(--t2)!important;font-weight:500!important;padding:9px 12px!important;
+display:flex!important;align-items:center!important;gap:8px!important;text-decoration:none!important;
+transition:color var(--sp) ease!important;}
+#navigation li:hover a{color:var(--t1)!important;}
+#navigation li.active{background:rgba(${ar},0.08)!important;}
+#navigation li.active a{color:var(--ac)!important;font-weight:600!important;}
+
+/* MAIN CONTENT */
+#container-main,.content,.page-content,.games-list-container,[class*="HomePageContainer"]{background:var(--rp1)!important;}
+h2,h3,.container-header h2,.game-sort-header{color:var(--t1)!important;font-weight:700!important;}
+
+/* GAME CARDS — specific selectors only, NOT catch-all [class*="card"] */
+.game-card,.game-card-container{
+background:var(--rp3)!important;border:1px solid var(--bd)!important;
+border-radius:10px!important;overflow:hidden!important;
+transition:transform var(--sp) ease,box-shadow var(--sp) ease,border-color var(--sp) ease!important;
+position:relative!important;}
+.game-card:hover,.game-card-container:hover{
+border-color:rgba(${ar},0.18)!important;transform:${hv}!important;
+box-shadow:0 4px 12px rgba(0,0,0,0.15)!important;}
+.game-card-thumb img,.game-card-thumb-container img{transition:transform .3s ease!important;}
+.game-card:hover .game-card-thumb img{transform:scale(1.02)!important;}
+.game-card-name,[class*="game-card-name"],.game-card-info{color:var(--t1)!important;font-weight:500!important;}
+
+/* FRIEND / PEOPLE TILES — fix the border bug. These should NOT have borders. */
+.people-list-item,.friend-tile,.friend-link,.avatar-card-container,
+[class*="friend-card"],[class*="people-card"],[class*="avatar-card"],
+.friend-list .list-item,.connections .list-item{
+background:transparent!important;border:none!important;border-radius:8px!important;
+transition:background var(--sp) ease!important;}
+.people-list-item:hover,.friend-tile:hover,[class*="avatar-card"]:hover,
+.friend-list .list-item:hover,.connections .list-item:hover{
+background:var(--rpH)!important;}
+
+/* GENERIC SECTIONS — very subtle, no heavy borders */
+.section-content,.people-list,.friend-list{
+background:transparent!important;border:none!important;}
+
+/* Only add borders to actual content panels, not every div with "card" in it */
+.section-content-off,.info-card{
+background:var(--rp2)!important;border:1px solid var(--bd)!important;border-radius:10px!important;}
+
+/* BUTTONS */
+[class*="btn-primary"],[class*="btn-cta"]{
+background:var(--ac)!important;border:none!important;border-radius:6px!important;
+color:#fff!important;font-weight:500!important;transition:opacity var(--sp) ease!important;}
+[class*="btn-primary"]:hover{opacity:0.9!important;}
+[class*="btn-secondary"],[class*="btn-control"]{
+background:var(--rp3)!important;border:1px solid var(--bd)!important;
+border-radius:8px!important;color:var(--t1)!important;}
+
+/* INPUTS */
+input,textarea,select,.input-field,.rbx-search-input{
+background:var(--rp3)!important;border:1px solid var(--bd)!important;
+border-radius:8px!important;color:var(--t1)!important;font-family:'Inter',sans-serif!important;
+transition:border-color var(--sp) ease!important;}
+input:focus,textarea:focus{border-color:var(--ac)!important;outline:none!important;
+box-shadow:0 0 0 2px rgba(${ar},0.12)!important;}
+
+/* MISC */
+.dropdown-menu,.modal-content,[class*="popover"]{
+background:var(--rp2)!important;border:1px solid var(--bd)!important;border-radius:10px!important;color:var(--t1)!important;}
+#footer-container,footer{background:var(--rp2)!important;border-top:1px solid var(--bd)!important;}
+#footer-container *,footer *{color:var(--t3)!important;}
+a{color:var(--ac)!important;transition:color var(--sp) ease!important;}
+a:hover{color:var(--acG)!important;text-decoration:none!important;}
+p,span,label,div,.text-default,.text-label{color:var(--t1)!important;}
+
+/* ===== ULTRABLOX CUSTOM ELEMENTS ===== */
+
+/* WELCOME BANNER */
+#robloxplus-welcome-banner{
+width:100%;padding:10px 24px;
+background:var(--rp2);border-bottom:1px solid var(--bd);
+border-left:2px solid var(--ac);
+display:flex;align-items:center;gap:8px;box-sizing:border-box;}
+.rp-bgr{font-size:13px;font-weight:600;color:var(--t1)!important;}
+.rp-bgr strong{color:var(--ac)!important;font-weight:700;}
+.rp-bsub{font-size:11px;color:var(--t3)!important;margin-left:2px;}
+
+/* LOGO */
+#robloxplus-logo-badge{display:inline-flex;align-items:center;gap:0;
+font-family:'Inter',sans-serif;font-weight:800;font-size:15px;cursor:default;
+letter-spacing:-0.02em;color:var(--t1)!important;}
+#robloxplus-logo-badge .rp-lm{color:var(--t1)!important;}
+#robloxplus-logo-badge .rp-lp{color:var(--ac)!important;margin-left:1px;}
+
+/* PINNED SECTION */
+#robloxplus-pinned-section{width:100%;padding:14px 24px;box-sizing:border-box;animation:rpFd var(--sp) ease both;}
+@keyframes rpFd{from{opacity:0}to{opacity:1}}
+.rp-ph{display:flex;align-items:center;gap:6px;margin-bottom:10px;}
+.rp-ph svg{color:var(--ac);flex-shrink:0;opacity:0.7;}
+.rp-ph h2{font-size:13px!important;font-weight:700!important;margin:0!important;color:var(--t1)!important;}
+.rp-pg{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;}
+.rp-pgc{flex:0 0 130px;background:var(--rp3);border:1px solid var(--bd);border-radius:8px;
+overflow:hidden;cursor:pointer;transition:border-color var(--sp) ease;position:relative;}
+.rp-pgc:hover{border-color:var(--bdH);}
+.rp-pgc img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:var(--rpH);}
+.rp-pgc .rp-pn{padding:6px 8px;font-size:11px;font-weight:600;color:var(--t1)!important;
+white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rp-ub{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;
+background:rgba(0,0,0,0.65);border:none;color:var(--pk)!important;
+display:flex;align-items:center;justify-content:center;cursor:pointer;
+opacity:0;transition:opacity .15s ease;z-index:5;padding:0;}
+.rp-pgc:hover .rp-ub{opacity:1;}
+.rp-ub:hover{background:var(--pk)!important;color:#fff!important;}
+
+/* PIN BUTTON ON CARDS */
+.rp-pb{position:absolute;top:4px;left:4px;width:26px;height:26px;border-radius:50%;
+background:rgba(0,0,0,0.5);border:none;color:#fff!important;
+display:flex;align-items:center;justify-content:center;cursor:pointer;
+opacity:0;transition:opacity .15s ease;z-index:10;padding:0;}
+.game-card:hover .rp-pb,.game-card-container:hover .rp-pb,
+li:hover>.rp-pb,[class*="game-card"]:hover>.rp-pb{opacity:1;}
+.rp-pb:hover{background:var(--amb)!important;color:var(--rp1)!important;}
+.rp-pb.rp-pd{opacity:1;background:var(--amb)!important;color:var(--rp1)!important;}
+
+/* WATERMARK */
+#robloxplus-watermark{position:fixed;bottom:8px;right:12px;font-family:'Inter',sans-serif;
+font-size:10px;font-weight:700;color:var(--t3)!important;opacity:0.3;z-index:99999;
+pointer-events:none;user-select:none;}
+
+/* TOAST */
+.rp-toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(40px);
+padding:8px 16px;background:var(--rp3);border:1px solid rgba(${ar},0.2);border-radius:6px;
+color:var(--t1)!important;font-family:'Inter',sans-serif;font-size:12px;font-weight:500;
+display:flex;align-items:center;gap:6px;z-index:999999;
+box-shadow:0 2px 8px rgba(0,0,0,0.25);transition:transform .2s ease,opacity .2s ease;opacity:0;}
+.rp-toast.rp-show{transform:translateX(-50%) translateY(0);opacity:1;}
+
+/* SESSION TIMER */
+#rp-timer{position:fixed;top:8px;right:12px;
+display:flex;align-items:center;gap:4px;padding:4px 9px;
+background:var(--rp2);border:1px solid var(--bd);border-radius:6px;
+font-family:'Inter',sans-serif;font-size:10px;font-weight:500;color:var(--t2)!important;
+z-index:99998;user-select:none;cursor:default;}
+#rp-timer svg{color:var(--ac);flex-shrink:0;opacity:0.6;}
+
+/* SPOTLIGHT SEARCH */
+#rp-spot-bg{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:999980;
+opacity:0;transition:opacity .15s ease;pointer-events:none;}
+#rp-spot-bg.rp-on{opacity:1;pointer-events:all;}
+#rp-spot-box{position:fixed;top:20%;left:50%;transform:translateX(-50%) scale(0.96);
+width:480px;background:var(--rp2);border:1px solid var(--bdH);border-radius:14px;
+z-index:999981;box-shadow:0 16px 50px rgba(0,0,0,0.5);padding:0;overflow:hidden;
+transition:transform .15s ease,opacity .15s ease;opacity:0;pointer-events:none;}
+#rp-spot-box.rp-on{transform:translateX(-50%) scale(1);opacity:1;pointer-events:all;}
+#rp-spot-box input{width:100%;padding:14px 18px;background:transparent!important;
+border:none!important;border-bottom:1px solid var(--bd)!important;border-radius:0!important;
+color:var(--t1)!important;font-size:15px!important;font-weight:500!important;
+font-family:'Inter',sans-serif!important;outline:none!important;box-shadow:none!important;}
+#rp-spot-box input::placeholder{color:var(--t3)!important;}
+.rp-spot-hint{padding:10px 18px;font-size:11px;color:var(--t3)!important;
+display:flex;align-items:center;gap:6px;}
+.rp-spot-kbd{background:var(--rp3);border:1px solid var(--bd);border-radius:4px;
+padding:1px 6px;font-size:10px;font-weight:700;color:var(--t2)!important;}
+
+/* CURSOR GLOW */
+#rp-glow{position:fixed;width:200px;height:200px;border-radius:50%;
+pointer-events:none;z-index:0;
+background:radial-gradient(circle,rgba(${ar},0.06) 0%,transparent 70%);
+transform:translate(-50%,-50%);transition:left .08s linear,top .08s linear;}
+
+/* SETTINGS */
+#rp-set-bg{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:999990;
+opacity:0;transition:opacity .2s ease;pointer-events:none;}
+#rp-set-bg.rp-on{opacity:1;pointer-events:all;}
+#rp-settings{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.96);
+width:400px;max-height:78vh;overflow-y:auto;
+background:var(--rp2);border:1px solid var(--bd);border-radius:14px;
+z-index:999991;padding:0;box-shadow:0 16px 50px rgba(0,0,0,0.5);
+transition:transform .2s ease,opacity .2s ease;opacity:0;pointer-events:none;}
+#rp-settings.rp-on{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:all;}
+.rp-sh{display:flex;align-items:center;justify-content:space-between;
+padding:18px 20px 14px;border-bottom:1px solid var(--bd);}
+.rp-sh h2{font-size:16px!important;font-weight:800!important;margin:0!important;color:var(--t1)!important;}
+.rp-sc{background:none;border:none;color:var(--t2);cursor:pointer;padding:4px;border-radius:6px;display:flex;}
+.rp-sc:hover{background:var(--rpH);color:var(--t1);}
+.rp-sb{padding:14px 20px 20px;}
+.rp-sgt{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+color:var(--t3)!important;margin:14px 0 8px;}
+.rp-sr{display:flex;align-items:center;justify-content:space-between;padding:8px 0;
+border-bottom:1px solid rgba(255,255,255,0.03);}
+.rp-sr:last-child{border:none;}
+.rp-sl{font-size:12px;font-weight:500;color:var(--t1)!important;}
+.rp-sd{font-size:10px;color:var(--t3)!important;margin-top:1px;}
+.rp-tg{position:relative;width:36px;height:20px;flex-shrink:0;}
+.rp-tg input{opacity:0;width:0;height:0;}
+.rp-tg-t{position:absolute;inset:0;background:var(--rpH);border-radius:10px;cursor:pointer;transition:background .2s ease;}
+.rp-tg-t::after{content:'';position:absolute;left:2px;top:2px;width:16px;height:16px;
+background:#fff;border-radius:50%;transition:transform .2s ease;}
+.rp-tg input:checked+.rp-tg-t{background:var(--ac);}
+.rp-tg input:checked+.rp-tg-t::after{transform:translateX(16px);}
+.rp-ci{width:32px;height:24px;border:2px solid var(--bd);border-radius:6px;cursor:pointer;background:none;padding:0;}
+.rp-ci::-webkit-color-swatch-wrapper{padding:0;} .rp-ci::-webkit-color-swatch{border:none;border-radius:3px;}
+.rp-sel{background:var(--rp3);border:1px solid var(--bd);border-radius:5px;
+color:var(--t1)!important;padding:3px 6px;font-size:11px;font-family:'Inter',sans-serif;cursor:pointer;}
+#rp-gear{position:fixed;bottom:10px;left:10px;width:32px;height:32px;
+background:var(--rp3);border:1px solid var(--bd);border-radius:50%;
+color:var(--ac)!important;display:flex;align-items:center;justify-content:center;
+cursor:pointer;z-index:99999;transition:transform .3s ease;padding:0;border:1px solid var(--bd);}
+#rp-gear:hover{transform:rotate(90deg);border-color:var(--ac);}
+
+/* ASSET DOWNLOAD BUTTON */
+.rp-dl-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;
+background:var(--rp3);border:1px solid var(--bd);border-radius:6px;
+color:var(--t1)!important;font-family:'Inter',sans-serif;font-size:12px;font-weight:500;
+cursor:pointer;transition:border-color var(--sp) ease;margin:6px 4px 6px 0;}
+.rp-dl-btn:hover{border-color:var(--ac);}
+.rp-dl-btn svg{flex-shrink:0;}
+
+/* COPY ID BUTTON */
+.rp-cid{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;
+background:var(--rp3);border:1px solid var(--bd);border-radius:6px;
+color:var(--t2)!important;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;
+cursor:pointer;transition:border-color var(--sp) ease,color var(--sp) ease;margin:4px 4px 4px 0;}
+.rp-cid:hover{border-color:var(--ac);color:var(--t1)!important;}
+.rp-cid svg{flex-shrink:0;}
+
+/* ROBUX USD BADGE */
+.rp-usd{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;
+background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.2);border-radius:4px;
+color:var(--mn)!important;font-family:'Inter',sans-serif;font-size:10px;font-weight:700;
+margin-left:4px;vertical-align:middle;cursor:default;}
+.rp-usd svg{flex-shrink:0;}
+
+/* THEME PRESETS */
+.rp-presets{display:flex;gap:6px;flex-wrap:wrap;padding:4px 0;}
+.rp-preset{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;
+transition:border-color .15s ease,transform .15s ease;}
+.rp-preset:hover{transform:scale(1.15);}
+.rp-preset.rp-active{border-color:var(--t1);}
+
+/* LIMITED VALUE CHART */
+#rp-chart-panel{width:100%;padding:16px 0;box-sizing:border-box;}
+.rp-chart-head{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:0 24px;}
+.rp-chart-head svg{color:var(--mn);flex-shrink:0;}
+.rp-chart-head h3{font-size:14px!important;font-weight:800!important;margin:0!important;color:var(--t1)!important;}
+.rp-chart-wrap{background:var(--rp2);border:1px solid var(--bd);border-radius:12px;
+margin:0 24px;padding:16px;position:relative;overflow:hidden;}
+.rp-chart-wrap canvas{width:100%;height:180px;display:block;}
+.rp-chart-stats{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap;}
+.rp-chart-stat{display:flex;flex-direction:column;gap:1px;}
+.rp-chart-stat-label{font-size:10px;font-weight:600;color:var(--t3)!important;text-transform:uppercase;letter-spacing:0.05em;}
+.rp-chart-stat-val{font-size:16px;font-weight:800;color:var(--t1)!important;}
+.rp-chart-stat-val.rp-up{color:var(--mn)!important;}
+.rp-chart-stat-val.rp-down{color:var(--pk)!important;}
+.rp-chart-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;
+background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.2);border-radius:5px;
+font-size:10px;font-weight:700;color:var(--mn)!important;margin-left:6px;}
+.rp-chart-badge.rp-neg{background:rgba(244,114,182,0.1);border-color:rgba(244,114,182,0.2);color:var(--pk)!important;}
+
+/* RECENTLY PLAYED */
+#rp-recent{width:100%;padding:14px 24px;box-sizing:border-box;}
+.rp-rh{display:flex;align-items:center;gap:6px;margin-bottom:10px;}
+.rp-rh svg{color:var(--ac);flex-shrink:0;opacity:0.7;}
+.rp-rh span{font-size:13px;font-weight:700;color:var(--t1)!important;}
+.rp-rg{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;}
+.rp-rc{flex:0 0 120px;background:var(--rp3);border:1px solid var(--bd);border-radius:8px;
+overflow:hidden;cursor:pointer;transition:border-color var(--sp) ease;position:relative;}
+.rp-rc:hover{border-color:var(--bdH);}
+.rp-rc img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:var(--rpH);}
+.rp-rc .rp-rn{padding:5px 7px;font-size:10px;font-weight:500;color:var(--t2)!important;
+white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* QUICK REJOIN */
+#rp-rejoin{position:fixed;bottom:10px;left:52px;
+display:flex;align-items:center;gap:6px;padding:6px 12px;
+background:var(--rp3);border:1px solid var(--bd);border-radius:8px;
+font-family:'Inter',sans-serif;font-size:11px;font-weight:500;color:var(--t2)!important;
+cursor:pointer;z-index:99998;transition:border-color var(--sp) ease;}
+#rp-rejoin:hover{border-color:var(--ac);color:var(--t1)!important;}
+#rp-rejoin svg{color:var(--ac);flex-shrink:0;}
+#rp-rejoin .rp-rjn{max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* PROFILE AGE BADGE */
+.rp-age{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;
+background:var(--rp3);border:1px solid var(--bd);border-radius:6px;
+font-family:'Inter',sans-serif;font-size:11px;font-weight:500;color:var(--t2)!important;
+margin:4px 4px 4px 0;}
+.rp-age svg{flex-shrink:0;color:var(--ac);opacity:0.6;}
+`;
+    }
+
+    let styleEl = null;
+    function injectCSS() {
+        if (styleEl) styleEl.remove(); styleEl = document.createElement('style');
+        styleEl.textContent = buildCSS(); document.head.appendChild(styleEl);
+    }
+    injectCSS();
+
+    // ========================================================================
+    //  UTILITIES
+    // ========================================================================
+    function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
+    function qA(s) { try { return [...document.querySelectorAll(s)]; } catch { return []; } }
+    function showToast(m) {
+        const o = document.getElementById('rp-toast'); if (o) o.remove();
+        const t = document.createElement('div'); t.id = 'rp-toast'; t.className = 'rp-toast';
+        t.innerHTML = `<span style="display:flex">${IC.pin}</span><span>${m}</span>`;
+        document.body.appendChild(t); requestAnimationFrame(() => t.classList.add('rp-show'));
+        setTimeout(() => { t.classList.remove('rp-show'); setTimeout(() => t.remove(), 300); }, 2000);
+    }
+    function gid(u) { if (!u) return null; const m = u.match(/\/(games|experiences)\/(\d+)/i); return m ? m[2] : null; }
+
+    // ========================================================================
+    //  PINNED GAMES
+    // ========================================================================
+    function gP() { try { return JSON.parse(GM_getValue('rp_pins', '[]')); } catch { return []; } }
+    function sP(g) { GM_setValue('rp_pins', JSON.stringify(g)); }
+    function addPin(d) { const g = gP(); if (g.some(x => gid(x.u) === gid(d.u))) return false; g.unshift(d); sP(g); return true; }
+    function rmPin(u) { const id = gid(u); let g = gP(); const l = g.length; g = g.filter(x => gid(x.u) !== id); sP(g); return g.length < l; }
+    function isPin(u) { const id = gid(u); return id && gP().some(x => gid(x.u) === id); }
+
+    // ========================================================================
+    //  FEATURE: BRANDING
+    // ========================================================================
+    function doBrand() {
+        if (!S.branding || document.getElementById('robloxplus-logo-badge')) return;
+        const l = document.querySelector('.rbx-navbar-logo,#nav-roblox-logo,.navbar-brand,a[href="/home"] .icon-logo-r-new');
+        if (!l) return; const c = l.closest('a') || l.parentElement; if (!c) return;
+        const o = c.querySelector('img,svg,span[class*="icon-logo"]'); if (o) o.style.display = 'none';
+        const b = document.createElement('span'); b.id = 'robloxplus-logo-badge';
+        b.innerHTML = '<span class="rp-lm">ultrablox</span><span class="rp-lp">.</span>'; c.prepend(b);
+        if (document.title.toLowerCase().includes('roblox')) document.title = document.title.replace(/Roblox/gi, 'Ultrablox');
+    }
+
+    // ========================================================================
+    //  FEATURE: WATERMARK
+    // ========================================================================
+    function doWM() {
+        if (!S.watermark || document.getElementById('robloxplus-watermark')) return;
+        const w = document.createElement('div'); w.id = 'robloxplus-watermark'; w.textContent = 'Ultrablox v5.0'; document.body.appendChild(w);
+    }
+
+    // ========================================================================
+    //  FEATURE: WELCOME BANNER
+    // ========================================================================
+    function doBanner() {
+        if (!S.welcomeBanner || document.getElementById('robloxplus-welcome-banner')) return;
+        let u = null;
+        const pe = document.querySelector('#nav-profile .text-nav,#nav-profile .font-header-2,.age-bracket-label-username,[class*="authenticated-username"],.text-overflow.xsmall');
+        if (pe && pe.textContent.trim()) u = pe.textContent.trim();
+        if (!u) { const m = document.querySelector('meta[name="user-data"]'); if (m) try { const d = JSON.parse(m.getAttribute('content') || '{}'); u = d.displayName || d.name; } catch { } }
+        if (!u) u = document.body.dataset?.displayName || document.body.dataset?.name || null;
+        if (!u) for (const s of document.querySelectorAll('script')) { const m = s.textContent.match(/"displayName"\s*:\s*"([^"]+)"/); if (m) { u = m[1]; break; } }
+        if (!u) u = 'Player';
+        const h = new Date().getHours(); const g = h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening';
+        const el = document.createElement('div'); el.id = 'robloxplus-welcome-banner';
+        el.innerHTML = `<span class="rp-bgr">hey <strong>${u}</strong>, good ${g}</span><span class="rp-bsub">· ultrablox</span>`;
+        const mc = document.querySelector('#container-main,.content,.page-content,[class*="HomePageContainer"]');
+        if (mc) mc.prepend(el); else {
+            const hd = document.querySelector('#header,.rbx-header,header');
+            if (hd && hd.nextSibling) hd.parentNode.insertBefore(el, hd.nextSibling); else document.body.prepend(el);
+        }
+    }
+
+    // ========================================================================
+    //  FEATURE: PINNED SECTION
+    // ========================================================================
+    function doPinned() {
+        if (!S.pinnedGames) { const e = document.getElementById('robloxplus-pinned-section'); if (e) e.remove(); return; }
+        const games = gP(); const ex = document.getElementById('robloxplus-pinned-section'); if (ex) ex.remove();
+        if (!games.length) return;
+        const sec = document.createElement('div'); sec.id = 'robloxplus-pinned-section';
+        const hd = document.createElement('div'); hd.className = 'rp-ph';
+        hd.innerHTML = `${IC.star}<h2>Pinned Games</h2>`; sec.appendChild(hd);
+        const gr = document.createElement('div'); gr.className = 'rp-pg';
+        games.forEach(g => {
+            const c = document.createElement('div'); c.className = 'rp-pgc';
+            c.innerHTML = `<button class="rp-ub" title="Unpin">${IC.x}</button><img src="${g.t || ''}" alt="${g.n}" loading="lazy" onerror="this.style.background='var(--rpH)';this.src='';"><div class="rp-pn">${g.n || 'Game'}</div>`;
+            c.addEventListener('click', e => { if (e.target.closest('.rp-ub')) return; if (g.u) window.location.href = g.u; });
+            c.querySelector('.rp-ub').addEventListener('click', e => { e.stopPropagation(); rmPin(g.u); showToast('Unpinned'); doPinned(); refreshPins(); });
+            gr.appendChild(c);
+        }); sec.appendChild(gr);
+        const bn = document.getElementById('robloxplus-welcome-banner');
+        if (bn && bn.parentNode) bn.parentNode.insertBefore(sec, bn.nextSibling);
+        else { const mc = document.querySelector('#container-main,.content,[class*="HomePageContainer"]'); if (mc) mc.prepend(sec); }
+    }
+
+    // ========================================================================
+    //  FEATURE: PIN BUTTONS
+    // ========================================================================
+    function doPins() {
+        if (!S.pinnedGames) return;
+        qA('.game-card,.game-card-container,[class*="game-card-link"],li[class*="game-card"],div[class*="game-tile"],a[href*="/games/"]').forEach(card => {
+            if (card.querySelector('.rp-pb')) return;
+            if (getComputedStyle(card).position === 'static') card.style.position = 'relative';
+            let lk = card.querySelector('a[href*="/games/"],a[href*="/experiences/"]');
+            if (!lk && card.tagName === 'A' && (card.href || '').match(/\/(games|experiences)\//)) lk = card;
+            if (!lk) lk = card.closest('a[href*="/games/"],a[href*="/experiences/"]');
+            const url = lk ? lk.href : ''; const id = gid(url); if (!id) return;
+            const img = card.querySelector('img'); const ne = card.querySelector('.game-card-name,[class*="game-card-name"],[class*="game-name"],[title]');
+            const tu = img ? (img.src || img.dataset?.src || '') : ''; const nm = ne ? (ne.textContent.trim() || ne.getAttribute('title') || '') : '';
+            const b = document.createElement('button'); b.className = 'rp-pb'; b.title = 'Pin'; b.innerHTML = IC.pin;
+            if (isPin(url)) { b.classList.add('rp-pd'); b.innerHTML = IC.pinFill; b.title = 'Unpin'; }
+            b.addEventListener('click', e => {
+                e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+                if (isPin(url)) { rmPin(url); b.classList.remove('rp-pd'); b.innerHTML = IC.pin; showToast('Unpinned "' + nm + '"'); }
+                else { if (addPin({ u: url, t: tu, n: nm || 'Game ' + id })) { b.classList.add('rp-pd'); b.innerHTML = IC.pinFill; showToast('Pinned "' + nm + '"'); } }
+                doPinned();
+            }, true);
+            card.appendChild(b);
+        });
+    }
+    function refreshPins() {
+        qA('.rp-pb').forEach(b => {
+            const c = b.parentElement;
+            let l = c.querySelector('a[href*="/games/"],a[href*="/experiences/"]');
+            if (!l && c.tagName === 'A') l = c; if (!l) l = c.closest('a[href*="/games/"]');
+            const u = l ? l.href : ''; if (u && isPin(u)) { b.classList.add('rp-pd'); b.innerHTML = IC.pinFill; }
+            else { b.classList.remove('rp-pd'); b.innerHTML = IC.pin; }
+        });
+    }
+
+    // ========================================================================
+    //  FEATURE: SESSION TIMER
+    // ========================================================================
+    const sessionStart = Date.now();
+    function doTimer() {
+        if (!S.sessionTimer) { const e = document.getElementById('rp-timer'); if (e) e.remove(); return; }
+        let el = document.getElementById('rp-timer');
+        if (!el) { el = document.createElement('div'); el.id = 'rp-timer'; document.body.appendChild(el); }
+        const diff = Math.floor((Date.now() - sessionStart) / 1000);
+        const h = Math.floor(diff / 3600); const m = Math.floor((diff % 3600) / 60); const s = diff % 60;
+        const pad = n => String(n).padStart(2, '0');
+        el.innerHTML = `${IC.clock} <span>${h ? h + 'h ' : ''}${pad(m)}m ${pad(s)}s</span>`;
+    }
+    setInterval(doTimer, 1000);
+
+    // ========================================================================
+    //  FEATURE: SPOTLIGHT SEARCH (Ctrl+K)
+    // ========================================================================
+    function doSpotlight() {
+        if (!S.spotlightSearch || document.getElementById('rp-spot-bg')) return;
+        const bg = document.createElement('div'); bg.id = 'rp-spot-bg'; document.body.appendChild(bg);
+        const box = document.createElement('div'); box.id = 'rp-spot-box';
+        box.innerHTML = `<input type="text" placeholder="Search Roblox..." autocomplete="off" spellcheck="false"><div class="rp-spot-hint"><span>Press</span><span class="rp-spot-kbd">Esc</span><span>to close</span><span style="margin-left:auto">Ctrl+K to toggle</span></div>`;
+        document.body.appendChild(box);
+        const inp = box.querySelector('input');
+        function open() { bg.classList.add('rp-on'); box.classList.add('rp-on'); inp.value = ''; setTimeout(() => inp.focus(), 50); }
+        function close() { bg.classList.remove('rp-on'); box.classList.remove('rp-on'); }
+        bg.addEventListener('click', close);
+        inp.addEventListener('keydown', e => {
+            if (e.key === 'Escape') close();
+            if (e.key === 'Enter' && inp.value.trim()) {
+                window.location.href = 'https://www.roblox.com/search/users?keyword=' + encodeURIComponent(inp.value.trim())
+                    + '&search-page=games'; close();
+            }
+        });
+        document.addEventListener('keydown', e => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                box.classList.contains('rp-on') ? close() : open();
+            }
+        });
+    }
+
+    // ========================================================================
+    //  FEATURE: CURSOR GLOW
+    // ========================================================================
+    function doCursorGlow() {
+        if (!S.cursorGlow) { const e = document.getElementById('rp-glow'); if (e) e.remove(); return; }
+        if (document.getElementById('rp-glow')) return;
+        const g = document.createElement('div'); g.id = 'rp-glow'; document.body.appendChild(g);
+        document.addEventListener('mousemove', e => { g.style.left = e.clientX + 'px'; g.style.top = e.clientY + 'px'; }, { passive: true });
+    }
+
+    // ========================================================================
+    //  FEATURE: ASSET DOWNLOAD BUTTON (shirts, pants, t-shirts, decals)
+    // ========================================================================
+    // Detects catalog item pages and injects a download button that fetches
+    // the asset thumbnail at full resolution and triggers a file download.
+    function doAssetDownload() {
+        if (!S.assetDownload) return;
+        // Only on catalog / library item pages
+        const url = window.location.href;
+        const catalogMatch = url.match(/\/(catalog|library)\/(\d+)/);
+        if (!catalogMatch) return;
+        const assetId = catalogMatch[2];
+
+        // Don't double-inject
+        if (document.getElementById('rp-dl-asset')) return;
+
+        // Find the action buttons area (near Buy/Get/Price)
+        const actionArea = document.querySelector(
+            '.item-action-container, .action-button, [class*="action-button"], ' +
+            '.PurchaseButton, [class*="purchase"], [class*="item-details"] .clearfix, ' +
+            '#item-details-container .section-content, .item-details .price-container'
+        );
+        // Fallback: just find any container near the item header
+        const target = actionArea || document.querySelector(
+            '.item-details, #item-details-container, [class*="ItemDetails"]'
+        );
+        if (!target) return;
+
+        const btn = document.createElement('button');
+        btn.id = 'rp-dl-asset';
+        btn.className = 'rp-dl-btn';
+        btn.innerHTML = `${IC.download} Download Asset`;
+        btn.title = 'Download this asset image (Roblox+ feature)';
+
+        btn.addEventListener('click', () => {
+            btn.innerHTML = `${IC.download} Downloading...`;
+            btn.style.opacity = '0.6';
+            btn.disabled = true;
+
+            // Use Roblox thumbnails API for high-res image
+            const thumbUrl = `https://thumbnails.roblox.com/v1/assets?assetIds=${assetId}&size=420x420&format=Png&isCircular=false`;
+
+            GM_xmlhttpRequest({
+                method: 'GET',
+                url: thumbUrl,
+                responseType: 'json',
+                onload: function (res) {
+                    try {
+                        const data = typeof res.response === 'string' ? JSON.parse(res.response) : res.response;
+                        if (data && data.data && data.data[0] && data.data[0].imageUrl) {
+                            const imgUrl = data.data[0].imageUrl;
+                            // Fetch the image as blob and download
+                            GM_xmlhttpRequest({
+                                method: 'GET',
+                                url: imgUrl,
+                                responseType: 'blob',
+                                onload: function (imgRes) {
+                                    const blobUrl = URL.createObjectURL(imgRes.response);
+                                    const a = document.createElement('a');
+                                    a.href = blobUrl;
+                                    a.download = `roblox_asset_${assetId}.png`;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    a.remove();
+                                    URL.revokeObjectURL(blobUrl);
+                                    btn.innerHTML = `${IC.download} Downloaded!`;
+                                    btn.style.opacity = '1';
+                                    setTimeout(() => { btn.innerHTML = `${IC.download} Download Asset`; btn.disabled = false; }, 2000);
+                                    showToast('Asset downloaded!');
+                                },
+                                onerror: function () {
+                                    // Fallback: open image in new tab
+                                    window.open(imgUrl, '_blank');
+                                    btn.innerHTML = `${IC.download} Download Asset`;
+                                    btn.style.opacity = '1'; btn.disabled = false;
+                                }
+                            });
+                        } else {
+                            showToast('Could not fetch asset thumbnail');
+                            btn.innerHTML = `${IC.download} Download Asset`;
+                            btn.style.opacity = '1'; btn.disabled = false;
+                        }
+                    } catch (err) {
+                        showToast('Download error — try again');
+                        btn.innerHTML = `${IC.download} Download Asset`;
+                        btn.style.opacity = '1'; btn.disabled = false;
+                    }
+                },
+                onerror: function () {
+                    showToast('Network error — try again');
+                    btn.innerHTML = `${IC.download} Download Asset`;
+                    btn.style.opacity = '1'; btn.disabled = false;
+                }
+            });
+        });
+
+        // Insert before the first child or append
+        if (target.firstChild) target.insertBefore(btn, target.firstChild);
+        else target.appendChild(btn);
+    }
+
+    // ========================================================================
+    //  FEATURE: COPY ID BUTTON
+    // ========================================================================
+    // Shows a small "Copy ID" chip on catalog, game, and user profile pages.
+    function doCopyId() {
+        if (!S.copyId) return;
+        if (document.getElementById('rp-copy-id')) return;
+
+        const url = window.location.href;
+        let id = null, label = '';
+
+        // Detect page type and extract ID
+        const catalogM = url.match(/\/(catalog|library)\/(\d+)/);
+        const gameM = url.match(/\/(games|experiences)\/(\d+)/);
+        const userM = url.match(/\/users\/(\d+)/);
+        const groupM = url.match(/\/groups\/(\d+)/);
+
+        if (catalogM) { id = catalogM[2]; label = 'Asset ID'; }
+        else if (gameM) { id = gameM[2]; label = 'Place ID'; }
+        else if (userM) { id = userM[2]; label = 'User ID'; }
+        else if (groupM) { id = groupM[2]; label = 'Group ID'; }
+        else return;
+
+        // Find a header area to attach to
+        const header = document.querySelector(
+            '.item-name-container h1, .item-name-container h2, ' +
+            '.game-name, [class*="game-title"], ' +
+            '.header-title h1, .header-title h2, ' +
+            '.profile-header .header-title, [class*="profile-header"] h1, ' +
+            'h1, h2'
+        );
+        if (!header) return;
+
+        const btn = document.createElement('button');
+        btn.id = 'rp-copy-id';
+        btn.className = 'rp-cid';
+        btn.innerHTML = `${IC.copy} ${label}: ${id}`;
+        btn.title = 'Click to copy';
+
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            navigator.clipboard.writeText(id).then(() => {
+                btn.innerHTML = `${IC.copy} Copied!`;
+                showToast(`${label} ${id} copied to clipboard`);
+                setTimeout(() => { btn.innerHTML = `${IC.copy} ${label}: ${id}`; }, 1500);
+            }).catch(() => {
+                // Fallback for older browsers
+                const ta = document.createElement('textarea');
+                ta.value = id; document.body.appendChild(ta);
+                ta.select(); document.execCommand('copy'); ta.remove();
+                btn.innerHTML = `${IC.copy} Copied!`;
+                showToast(`${label} ${id} copied`);
+                setTimeout(() => { btn.innerHTML = `${IC.copy} ${label}: ${id}`; }, 1500);
+            });
+        });
+
+        // Insert right after the header element
+        header.parentNode.insertBefore(btn, header.nextSibling);
+    }
+
+    // ========================================================================
+    //  FEATURE: ROBUX TO USD CONVERTER
+    // ========================================================================
+    // Finds Robux price elements and appends a small USD equivalent badge.
+    // Rate: ~$0.0125 per Robux (purchase price) is the consumer-facing rate.
+    const ROBUX_TO_USD = 0.0125;
+    function doRobuxConvert() {
+        if (!S.robuxConvert) return;
+
+        // Find elements that display R$ amounts
+        const priceEls = qA(
+            '.text-robux-lg, .text-robux, .text-robux-tile, ' +
+            '[class*="robux-price"], [class*="price-text"], ' +
+            '.PriceLabel, .price-container .text-lead, ' +
+            '.resale-price-container .text-lead'
+        );
+
+        priceEls.forEach(el => {
+            // Skip if already annotated
+            if (el.querySelector('.rp-usd') || el.dataset.rpUsd) return;
+            el.dataset.rpUsd = 'true';
+
+            // Extract numeric value: handle "123" or "1,234" or "Free"
+            const rawText = el.textContent.replace(/,/g, '').trim();
+            const num = parseInt(rawText.match(/\d+/)?.[0]);
+            if (!num || isNaN(num)) return;
+
+            const usd = (num * ROBUX_TO_USD).toFixed(2);
+            const badge = document.createElement('span');
+            badge.className = 'rp-usd';
+            badge.innerHTML = `${IC.dollar} ~$${usd}`;
+            badge.title = `Approx. USD value at R$${num}`;
+            el.appendChild(badge);
+        });
+    }
+
+    // ========================================================================
+    //  FEATURE: LIMITED VALUE CHART (canvas-based resale price graph)
+    // ========================================================================
+    function doLimitedChart() {
+        if (!S.limitedChart) return;
+        const url = window.location.href;
+        const m = url.match(/\/(catalog|library)\/(\d+)/);
+        if (!m) return;
+        const assetId = m[2];
+        if (document.getElementById('rp-chart-panel')) return;
+
+        // Check if this item has resale data (Limited items only)
+        const apiUrl = `https://economy.roblox.com/v1/assets/${assetId}/resale-data`;
+        GM_xmlhttpRequest({
+            method: 'GET', url: apiUrl, responseType: 'json',
+            onload: function (res) {
+                try {
+                    const data = typeof res.response === 'string' ? JSON.parse(res.response) : res.response;
+                    if (!data || !data.priceDataPoints || data.priceDataPoints.length < 2) return;
+                    renderChart(data, assetId);
+                } catch { }
+            }, onerror: function () { }
+        });
+    }
+
+    function renderChart(data, assetId) {
+        const points = data.priceDataPoints;
+        const panel = document.createElement('div');
+        panel.id = 'rp-chart-panel';
+
+        // Header
+        const head = document.createElement('div');
+        head.className = 'rp-chart-head';
+        head.innerHTML = `${IC.trending}<h3>Limited Value History</h3>`;
+        panel.appendChild(head);
+
+        // Chart wrapper
+        const wrap = document.createElement('div');
+        wrap.className = 'rp-chart-wrap';
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 600; canvas.height = 180;
+        wrap.appendChild(canvas);
+
+        // Stats
+        const prices = points.map(p => p.value);
+        const latest = prices[prices.length - 1];
+        const oldest = prices[0];
+        const high = Math.max(...prices);
+        const low = Math.min(...prices);
+        const change = latest - oldest;
+        const changePct = oldest > 0 ? ((change / oldest) * 100).toFixed(1) : 0;
+        const isUp = change >= 0;
+
+        const stats = document.createElement('div');
+        stats.className = 'rp-chart-stats';
+        stats.innerHTML = `
+            <div class="rp-chart-stat"><span class="rp-chart-stat-label">Current RAP</span><span class="rp-chart-stat-val">R$ ${latest.toLocaleString()}</span></div>
+            <div class="rp-chart-stat"><span class="rp-chart-stat-label">Highest</span><span class="rp-chart-stat-val">R$ ${high.toLocaleString()}</span></div>
+            <div class="rp-chart-stat"><span class="rp-chart-stat-label">Lowest</span><span class="rp-chart-stat-val">R$ ${low.toLocaleString()}</span></div>
+            <div class="rp-chart-stat"><span class="rp-chart-stat-label">Change</span>
+                <span class="rp-chart-stat-val ${isUp ? 'rp-up' : 'rp-down'}">${isUp ? '+' : ''}${change.toLocaleString()}
+                    <span class="rp-chart-badge ${isUp ? '' : 'rp-neg'}">${IC.trending} ${isUp ? '+' : ''}${changePct}%</span>
+                </span>
+            </div>`;
+        wrap.appendChild(stats);
+        panel.appendChild(wrap);
+
+        // Insert into item details page
+        const target = document.querySelector(
+            '.item-details, #item-details-container, [class*="ItemDetails"], ' +
+            '#container-main .content, .page-content'
+        );
+        if (target) {
+            const existing = target.querySelector('.item-field-container, .action-button, [class*="action"]');
+            if (existing) target.insertBefore(panel, existing.nextSibling);
+            else target.appendChild(panel);
+        }
+
+        // Draw the chart on canvas
+        requestAnimationFrame(() => drawChart(canvas, points));
+    }
+
+    function drawChart(canvas, points) {
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width, H = canvas.height;
+        const pad = { t: 10, r: 10, b: 25, l: 50 };
+        const cW = W - pad.l - pad.r, cH = H - pad.t - pad.b;
+
+        const prices = points.map(p => p.value);
+        const minP = Math.min(...prices) * 0.95;
+        const maxP = Math.max(...prices) * 1.05;
+        const range = maxP - minP || 1;
+
+        ctx.clearRect(0, 0, W, H);
+
+        // Grid lines
+        ctx.strokeStyle = 'rgba(150,150,200,0.08)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 4; i++) {
+            const y = pad.t + (cH / 4) * i;
+            ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
+            // Y-axis labels
+            const val = maxP - (range / 4) * i;
+            ctx.fillStyle = 'rgba(150,150,200,0.4)';
+            ctx.font = '10px Inter, sans-serif';
+            ctx.textAlign = 'right';
+            ctx.fillText(Math.round(val).toLocaleString(), pad.l - 6, y + 3);
+        }
+
+        // Build path points
+        const pts = prices.map((v, i) => ({
+            x: pad.l + (i / (prices.length - 1)) * cW,
+            y: pad.t + cH - ((v - minP) / range) * cH
+        }));
+
+        // Gradient fill under curve
+        const style = getComputedStyle(document.documentElement);
+        const acColor = style.getPropertyValue('--ac').trim() || '#6366f1';
+        const grad = ctx.createLinearGradient(0, pad.t, 0, H - pad.b);
+        grad.addColorStop(0, acColor + '30');
+        grad.addColorStop(1, acColor + '00');
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, H - pad.b);
+        pts.forEach(p => ctx.lineTo(p.x, p.y));
+        ctx.lineTo(pts[pts.length - 1].x, H - pad.b);
+        ctx.closePath();
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // Line
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, pts[0].y);
+        for (let i = 1; i < pts.length; i++) {
+            const cp1x = (pts[i - 1].x + pts[i].x) / 2;
+            ctx.bezierCurveTo(cp1x, pts[i - 1].y, cp1x, pts[i].y, pts[i].x, pts[i].y);
+        }
+        ctx.strokeStyle = acColor;
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        // Endpoint dot
+        const last = pts[pts.length - 1];
+        ctx.beginPath();
+        ctx.arc(last.x, last.y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = acColor;
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(last.x, last.y, 6, 0, Math.PI * 2);
+        ctx.strokeStyle = acColor + '40';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    }
+
+    // ========================================================================
+    //  FEATURE: RECENTLY PLAYED (auto-tracks game page visits)
+    // ========================================================================
+    function getRecent() { try { return JSON.parse(GM_getValue('rp_recent', '[]')); } catch { return []; } }
+    function saveRecent(list) { GM_setValue('rp_recent', JSON.stringify(list)); }
+
+    // Track current page if it's a game
+    function trackGameVisit() {
+        const url = window.location.href;
+        const m = url.match(/\/(games|experiences)\/(\d+)/);
+        if (!m) return;
+        const gameId = m[2];
+        const name = document.querySelector('.game-name, [class*="game-title"], h1')?.textContent?.trim() || 'Game';
+        const thumb = document.querySelector('meta[property="og:image"]')?.content || '';
+
+        let recent = getRecent();
+        recent = recent.filter(g => g.id !== gameId);
+        recent.unshift({ id: gameId, n: name, t: thumb, u: url, ts: Date.now() });
+        if (recent.length > 12) recent = recent.slice(0, 12);
+        saveRecent(recent);
+    }
+    trackGameVisit();
+
+    function doRecentGames() {
+        if (!S.recentGames) { const e = document.getElementById('rp-recent'); if (e) e.remove(); return; }
+        const recent = getRecent();
+        if (!recent.length) return;
+        if (document.getElementById('rp-recent')) return;
+        // Only show on homepage
+        if (!window.location.pathname.match(/^\/(home)?$/)) return;
+
+        const sec = document.createElement('div'); sec.id = 'rp-recent';
+        const hd = document.createElement('div'); hd.className = 'rp-rh';
+        hd.innerHTML = `${IC.history}<span>recently played</span>`;
+        sec.appendChild(hd);
+
+        const row = document.createElement('div'); row.className = 'rp-rg';
+        recent.slice(0, 8).forEach(g => {
+            const c = document.createElement('div'); c.className = 'rp-rc';
+            c.innerHTML = `<img src="${g.t || ''}" alt="${g.n}" loading="lazy" onerror="this.style.background='var(--rpH)';this.src=''"><div class="rp-rn">${g.n}</div>`;
+            c.addEventListener('click', () => { window.location.href = g.u; });
+            row.appendChild(c);
+        });
+        sec.appendChild(row);
+
+        // Insert after pinned section or welcome banner
+        const after = document.getElementById('robloxplus-pinned-section') || document.getElementById('robloxplus-welcome-banner');
+        if (after && after.parentNode) after.parentNode.insertBefore(sec, after.nextSibling);
+        else {
+            const mc = document.querySelector('#container-main,.content,[class*="HomePageContainer"]');
+            if (mc) mc.prepend(sec);
+        }
+    }
+
+    // ========================================================================
+    //  FEATURE: QUICK REJOIN (floating button for last played game)
+    // ========================================================================
+    function doQuickRejoin() {
+        if (!S.quickRejoin) { const e = document.getElementById('rp-rejoin'); if (e) e.remove(); return; }
+        if (document.getElementById('rp-rejoin')) return;
+        const recent = getRecent();
+        if (!recent.length) return;
+        const last = recent[0];
+
+        const btn = document.createElement('div'); btn.id = 'rp-rejoin';
+        btn.innerHTML = `${IC.play}<span class="rp-rjn">${last.n}</span>`;
+        btn.title = `Rejoin: ${last.n}`;
+        btn.addEventListener('click', () => { window.location.href = last.u; });
+        document.body.appendChild(btn);
+    }
+
+    // ========================================================================
+    //  FEATURE: PROFILE AGE BADGE
+    // ========================================================================
+    function doProfileAge() {
+        if (!S.profileAge) return;
+        if (document.getElementById('rp-age-badge')) return;
+        const url = window.location.href;
+        const m = url.match(/\/users\/(\d+)/);
+        if (!m) return;
+
+        // Look for the join date element on the profile
+        const dateEl = document.querySelector('.profile-stats-container .text-lead, .profile-about .text-default, [class*="join-date"], .tooltip-pastnames');
+        // Try to find join date from page content
+        const allText = document.body.innerText;
+        const joinMatch = allText.match(/Join Date[:\s]*([A-Z][a-z]+ \d{1,2}, \d{4})/i)
+            || allText.match(/(\d{1,2}\/\d{1,2}\/\d{4})/);
+
+        let ageText = '';
+        if (joinMatch) {
+            const joinDate = new Date(joinMatch[1]);
+            if (!isNaN(joinDate)) {
+                const diff = Date.now() - joinDate.getTime();
+                const days = Math.floor(diff / 86400000);
+                const years = Math.floor(days / 365);
+                const months = Math.floor((days % 365) / 30);
+                if (years > 0) ageText = `${years}y ${months}m old`;
+                else if (months > 0) ageText = `${months}m ${days % 30}d old`;
+                else ageText = `${days}d old`;
+            }
+        }
+        if (!ageText) return;
+
+        const header = document.querySelector('.profile-header .header-title, [class*="profile-header"] h1, .profile-display-name, h1');
+        if (!header) return;
+
+        const badge = document.createElement('span'); badge.id = 'rp-age-badge'; badge.className = 'rp-age';
+        badge.innerHTML = `${IC.calendar} ${ageText}`;
+        badge.title = joinMatch ? `Joined: ${joinMatch[1]}` : 'Account age';
+        header.parentNode.insertBefore(badge, header.nextSibling);
+    }
+
+    // ========================================================================
+    //  THEME PRESETS
+    // ========================================================================
+    const THEME_PRESETS = {
+        indigo: { color: '#6366f1', label: 'Indigo' },
+        ocean: { color: '#0ea5e9', label: 'Ocean' },
+        violet: { color: '#8b5cf6', label: 'Violet' },
+        emerald: { color: '#10b981', label: 'Emerald' },
+        sunset: { color: '#f97316', label: 'Sunset' },
+        rose: { color: '#f43f5e', label: 'Rose' },
+        cyber: { color: '#06b6d4', label: 'Cyber' },
+        gold: { color: '#eab308', label: 'Gold' },
+        slate: { color: '#64748b', label: 'Slate' },
+    };
+
+    // ========================================================================
+    //  SETTINGS PANEL (updated with new features + theme presets)
+    // ========================================================================
+    function tog(k, l, d) { return `<div class="rp-sr"><div><div class="rp-sl">${l}</div><div class="rp-sd">${d}</div></div><label class="rp-tg"><input type="checkbox" data-key="${k}" ${S[k] ? 'checked' : ''}><span class="rp-tg-t"></span></label></div>`; }
+
+    function doSettings() {
+        if (document.getElementById('rp-gear')) return;
+        const gb = document.createElement('button'); gb.id = 'rp-gear'; gb.title = 'Settings'; gb.innerHTML = IC.gear; document.body.appendChild(gb);
+        const bg = document.createElement('div'); bg.id = 'rp-set-bg'; document.body.appendChild(bg);
+        const p = document.createElement('div'); p.id = 'rp-settings';
+
+        // Build theme preset circles HTML
+        let presetsHTML = '<div class="rp-presets">';
+        for (const [key, val] of Object.entries(THEME_PRESETS)) {
+            const active = S.accentColor === val.color ? 'rp-active' : '';
+            presetsHTML += `<div class="rp-preset ${active}" data-preset="${key}" style="background:${val.color}" title="${val.label}"></div>`;
+        }
+        presetsHTML += '</div>';
+
+        p.innerHTML = `<div class="rp-sh"><h2>Ultrablox Settings</h2><button class="rp-sc">${IC.x}</button></div>
+<div class="rp-sb">
+<div class="rp-sgt">Core Features</div>
+${tog('darkMode', 'Dark Mode', 'Full dark theme override')}
+${tog('welcomeBanner', 'Welcome Banner', 'Username greeting')}
+${tog('pinnedGames', 'Pinned Games', 'Pin games to homepage')}
+${tog('branding', 'Ultrablox Branding', 'Custom logo badge')}
+${tog('watermark', 'Watermark', 'Version indicator')}
+${tog('hoverFx', 'Hover Effects', 'Card lift on hover')}
+<div class="rp-sgt">Productivity</div>
+${tog('sessionTimer', 'Session Timer', 'Time spent tracker')}
+${tog('spotlightSearch', 'Spotlight Search', 'Ctrl+K quick search')}
+${tog('assetDownload', 'Asset Download', 'Download shirts, decals, etc.')}
+${tog('copyId', 'Copy ID', 'Copy asset/game/user IDs')}
+${tog('robuxConvert', 'Robux to USD', 'Show dollar estimates on prices')}
+${tog('limitedChart', 'Limited Value Chart', 'Price history graph for Limiteds')}
+${tog('recentGames', 'Recently Played', 'Track and show games you visited')}
+${tog('quickRejoin', 'Quick Rejoin', 'Floating button for last game')}
+${tog('profileAge', 'Profile Age', 'Show account age on profiles')}
+<div class="rp-sgt">Visual</div>
+${tog('cursorGlow', 'Cursor Glow', 'Subtle light follows mouse')}
+<div class="rp-sgt">Theme Presets</div>
+${presetsHTML}
+<div class="rp-sgt">Custom</div>
+<div class="rp-sr"><div><div class="rp-sl">Accent Color</div><div class="rp-sd">Or pick your own</div></div><input type="color" class="rp-ci" data-key="accentColor" value="${S.accentColor}"></div>
+<div class="rp-sr"><div><div class="rp-sl">Animation Speed</div></div><select class="rp-sel" data-key="animSpeed"><option value="none" ${S.animSpeed === 'none' ? 'selected' : ''}>Off</option><option value="reduced" ${S.animSpeed === 'reduced' ? 'selected' : ''}>Reduced</option><option value="normal" ${S.animSpeed === 'normal' ? 'selected' : ''}>Normal</option></select></div>
+<div class="rp-sr"><div><div class="rp-sl">Font Size</div></div><select class="rp-sel" data-key="fontSize"><option value="small" ${S.fontSize === 'small' ? 'selected' : ''}>Small</option><option value="default" ${S.fontSize === 'default' ? 'selected' : ''}>Default</option><option value="large" ${S.fontSize === 'large' ? 'selected' : ''}>Large</option></select></div>
+<div style="text-align:center;padding-top:10px;border-top:1px solid rgba(255,255,255,0.03)"><button id="rp-reset" style="background:none;border:1px solid var(--pk);color:var(--pk);border-radius:6px;padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Reset All</button></div>
+</div>`;
+        document.body.appendChild(p);
+        const open = () => { bg.classList.add('rp-on'); p.classList.add('rp-on'); };
+        const close = () => { bg.classList.remove('rp-on'); p.classList.remove('rp-on'); };
+        gb.addEventListener('click', open); bg.addEventListener('click', close);
+        p.querySelector('.rp-sc').addEventListener('click', close);
+        // Toggle handlers
+        p.querySelectorAll('input[type="checkbox"][data-key]').forEach(c => {
+            c.addEventListener('change', () => { S[c.dataset.key] = c.checked; saveS(S); applyChange(); });
+        });
+        // Color picker
+        p.querySelector('.rp-ci').addEventListener('input', debounce(e => {
+            S.accentColor = e.target.value; S.themePreset = 'custom'; saveS(S); injectCSS();
+            p.querySelectorAll('.rp-preset').forEach(pr => pr.classList.remove('rp-active'));
+        }, 80));
+        // Select handlers
+        p.querySelectorAll('.rp-sel').forEach(s => { s.addEventListener('change', () => { S[s.dataset.key] = s.value; saveS(S); injectCSS(); }); });
+        // Theme preset handlers
+        p.querySelectorAll('.rp-preset').forEach(pr => {
+            pr.addEventListener('click', () => {
+                const key = pr.dataset.preset;
+                const theme = THEME_PRESETS[key];
+                if (!theme) return;
+                S.accentColor = theme.color;
+                S.themePreset = key;
+                saveS(S);
+                injectCSS();
+                // Update color picker to match
+                const ci = p.querySelector('.rp-ci');
+                if (ci) ci.value = theme.color;
+                // Update active states
+                p.querySelectorAll('.rp-preset').forEach(x => x.classList.remove('rp-active'));
+                pr.classList.add('rp-active');
+                showToast(`Theme: ${theme.label}`);
+            });
+        });
+        // Reset
+        p.querySelector('#rp-reset').addEventListener('click', () => {
+            S = { ...DEFAULTS }; saveS(S); close();
+            document.querySelectorAll('[id^="robloxplus"],[id^="rp-"]').forEach(e => e.remove()); styleEl = null;
+            injectCSS(); applyAll(); doSettings(); doSpotlight(); doCursorGlow(); doTimer();
+        });
+    }
+
+    function applyChange() {
+        injectCSS();
+        ['robloxplus-welcome-banner', 'robloxplus-logo-badge', 'robloxplus-watermark', 'robloxplus-pinned-section', 'rp-timer', 'rp-glow', 'rp-dl-asset', 'rp-copy-id', 'rp-chart-panel', 'rp-recent', 'rp-rejoin', 'rp-age-badge'].forEach(id => {
+            const e = document.getElementById(id); if (e) e.remove();
+        });
+        qA('.rp-pb').forEach(b => b.remove());
+        qA('.rp-usd').forEach(b => b.remove());
+        qA('[data-rp-usd]').forEach(el => delete el.dataset.rpUsd);
+        applyAll(); doCursorGlow(); doTimer();
+    }
+
+    // ========================================================================
+    //  MASTER + OBSERVER
+    // ========================================================================
+    let raf = false;
+    function applyAll() {
+        if (raf) return; raf = true;
+        requestAnimationFrame(() => {
+            raf = false;
+            doBrand(); doWM(); doBanner(); doPinned(); doPins();
+            doAssetDownload(); doCopyId(); doRobuxConvert(); doLimitedChart();
+            doRecentGames(); doProfileAge();
+        });
+    }
+    const dApply = debounce(applyAll, 350);
+    function setupObs() {
+        new MutationObserver(ms => {
+            for (const m of ms) for (const n of m.addedNodes)
+                if (n.nodeType === 1 && !n.id?.startsWith('robloxplus') && !n.id?.startsWith('rp-') && !n.classList?.contains('rp-toast')) { dApply(); return; }
+        }).observe(document.body, { childList: true, subtree: true });
+    }
+
+    // ========================================================================
+    //  BOOT
+    // ========================================================================
+    function boot() {
+        console.log('%c[Ultrablox]%c v5.0', 'color:#6366f1;font-weight:bold', 'color:#34d399');
+        applyAll(); doSettings(); doSpotlight(); doCursorGlow(); doTimer(); doQuickRejoin(); setupObs();
+        setTimeout(applyAll, 2500); setTimeout(doQuickRejoin, 3000);
+    }
+    if (document.body) boot(); else document.addEventListener('DOMContentLoaded', boot);
+})();
